@@ -59,4 +59,6 @@ db.authenticate()
 //   rejectUnauthorized: false,
 // }, app);
 // httpsServer.listen(443, () => console.log(`Server Running at https://localhost`))
-app.listen(process.env.PORT, () => console.log(`Server Running at http://localhost:${config.port}`));
+app.listen(process.env.PORT ?? 5000, () => console.log(`Server Running at http://localhost:${config.port}`));
+
+export default app
