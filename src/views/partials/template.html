@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" dir="">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Admin Template</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,400i,600,700,800,900" rel="stylesheet" />
+    <link href="/css/themes/lite-purple.min.css" rel="stylesheet" />
+    <link href="/css/plugins/perfect-scrollbar.min.css" rel="stylesheet" />
+    <link href="/css/plugins/datatables.min.css" rel="stylesheet" />
+    <link href="/fonts/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/css/plugins/toastr.css" rel="stylesheet">
+    <link href="/css/plugins/sweetalert2.min.css" rel="stylesheet">
+    <script src="/js/plugins/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+    <script type="text/javascript">
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCCIJ4d-WRO50m2XHlIckl-S1mYaOJ6IY",
+            authDomain: "sakurata-wapi.firebaseapp.com",
+            projectId: "sakurata-wapi",
+            storageBucket: "sakurata-wapi.appspot.com",
+            messagingSenderId: "405230396670",
+            appId: "1:405230396670:web:cc076894a9ef79261ff1af",
+            measurementId: "G-P5Y77G3E6S"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+    </script>
+</head>
+
+<body class="text-left">
+    <div class="app-admin-wrap layout-sidebar-large">
+        <div class="main-header">
+            <div class="logo">
+                <img src="/images/logo.png" alt="">
+            </div>
+            <div class="menu-toggle">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="d-flex align-items-center">
+                <div></div>
+            </div>
+            <div style="margin: auto"></div>
+            <div class="header-part-right">
+                <!-- Full screen toggle -->
+                <i class="i-Full-Screen header-icon d-none d-sm-inline-block" data-fullscreen></i>
+                <!-- User avatar dropdown -->
+                <div class="dropdown">
+                    <div class="user col align-self-end">
+                        <img src="/images/faces/1.jpg" id="userDropdown" alt="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <div class="dropdown-header">
+                                <i class="i-Lock-User mr-1"></i> {{userdata.name}}
+                            </div>
+                            <a class="dropdown-item" href="#">Profil</a>
+                            <a class="dropdown-item" href="/logout">Keluar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="side-content-wrap">
+            <div class="sidebar-left open rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
+                <ul class="navigation-left">
+                    <li class="nav-item"><a class="nav-item-hold" href="/"><i class="nav-icon fa fa-chart-area"></i><span class="nav-text">Dashboard</span></a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item"><a class="nav-item-hold" href="/devices"><i class="nav-icon fab fa-whatsapp"></i><span class="nav-text">Devices</span></a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="datamaster"><a class="nav-item-hold" href="#"><i class="nav-icon fa fa-box"></i><span class="nav-text">Datamaster</span></a>
+                        <div class="triangle"></div>
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar="" data-suppress-scroll-x="true">
+                <ul class="childNav" data-parent="datamaster">
+                    <li class="nav-item"><a href="/users"><i class="nav-icon fa fa-users"></i><span class="item-name">Users</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-overlay"></div>
+        </div>
+        <!-- =============== Left side End ================-->
+        <div class="main-content-wrap sidenav-open d-flex flex-column">
+            <!-- ============ Body content start ============= -->
+            <div class="main-content">
+                <!-- <div class="breadcrumb">
+                    <h1>Blank</h1>
+                    <ul>
+                        <li><a href="">Pages</a></li>
+                        <li>Blank</li>
+                    </ul>
+                </div> -->
+                {{{body}}}
+            </div><!-- Footer Start -->
+            <div class="flex-grow-1"></div>
+            <div class="app-footer">
+                <div class="footer-bottom d-flex flex-column flex-sm-row align-items-center">
+                    <span class="flex-grow-1"></span>
+                    <div class="d-flex align-items-center">
+                        <img class="logo" src="/images/logo.png" alt="">
+                        <div>
+                            <p class="m-0">&copy; 2018 Admin Template</p>
+                            <p class="m-0">All rights reserved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- fotter end -->
+        </div>
+    </div><!-- ============ Search UI Start ============= -->
+    <!-- ============ Search UI End ============= -->
+    <script src="/js/plugins/bootstrap.bundle.min.js"></script>
+    <script src="/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="/js/scripts/script.min.js"></script>
+    <script src="/js/scripts/sidebar.large.script.min.js"></script>
+    <script src="/js/plugins/datatables.min.js"></script>
+    <script src="/js/plugins/loadingoverlay/loadingoverlay.min.js"></script>
+    <script src="/js/plugins/toastr.min.js" type="text/javascript"></script>
+    <script src="/js/plugins/sweetalert2.min.js" type="text/javascript"></script>
+</body>
+
+</html>

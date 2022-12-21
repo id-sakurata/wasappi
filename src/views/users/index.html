@@ -1,0 +1,234 @@
+<div class="d-flex justify-content-between">
+    <div class="breadcrumb">
+        <h1>Datamaster</h1>
+        <ul>
+            <li>Users</li>
+        </ul>
+    </div>
+    <div class="d-block">
+        <button id="btn-modal" class="btn btn-primary"> <i class="fa fa-plus"></i> New User</button>
+    </div>
+</div>
+<div class="separator-breadcrumb border-top"></div>
+
+<table id="table" class="table table-bordered table-inverse table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Group</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+<div class="modal fade" id="modalform">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="form">
+                <div class="modal-header">
+                    <h4 class="modal-title">Form</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input name="name" value="" class="form-control" type="text"  autocomplete="off">
+                                <span validation-for="name" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input name="email" value="" class="form-control" type="text"  autocomplete="off">
+                                <span validation-for="email" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input name="username" value="" class="form-control" type="text"  autocomplete="off">
+                                <span validation-for="username" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Group</label>
+                                <select name="group" class="form-control" >
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <span validation-for="group" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input name="password" value="" class="form-control" type="password" autocomplete="off">
+                                <span validation-for="password" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Password Confirm</label>
+                                <input name="password_confirm" value="" class="form-control" type="password" autocomplete="off">
+                                <span validation-for="password_confirm" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var formAjaxConfig = {};
+
+        $("#btn-modal").click(function (e) {
+            e.preventDefault();
+            formAjaxConfig = {
+                url: '/api/auth/register',
+            };
+            document.forms['form'].reset();
+            $('#modalform').modal('show');
+        });
+
+        var table = $('#table').DataTable({
+            'ajax':{
+                'url'        : '/api/user/datatables',
+                'dataSrc'    : 'data',
+                'type'       : 'POST'
+             },
+            'processing'    : true,
+            'serverSide'    : true,
+            'paging'        : true,
+            'lengthChange'  : true,
+            'searching'     : true,
+            'ordering'      : false,
+            'info'          : true,
+            'autoWidth'     : false,
+            'columns'       : [
+                {"data": "name"},
+                {"data": "username"},
+                {"data": "email"},
+                {"data": "group"},
+                {"data": "id", "render": function(data, i, row){
+                    const action = document.createElement("div")
+                    action.className = "table-action";
+                    action.innerHTML = (`
+                        <button class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                    `);
+                    return action.outerHTML;
+                }},
+            ],
+            'createdRow'    : function(parent, row) {
+                $("button", parent).eq(0).click(function (e) {
+                    e.preventDefault();
+                    document.forms['form'].reset();
+                    formAjaxConfig = {
+                        url: `/api/user/${row.id}/update`,
+                    };
+                    $.each(row, function(index, val) {
+                        try {
+                            document.forms['form'][index].value = val;
+                        } catch(e) {
+                            //do nothing
+                        }
+                    });
+                    $('#modalform').modal('show');
+                });
+
+                $("button", parent).eq(1).click(function (e) {
+                    e.preventDefault();
+                    swal({
+                        title: 'Peringatan!',
+                        text: 'Anda akan menghapus pengguna yang dipilih?.',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        cancelButtonText: 'Tidak',
+                        confirmButtonText: 'Ya',
+                        }).then(function () {
+                            $.LoadingOverlay("show");
+                            $.ajax({
+                                url: `/api/user/${row.id}/delete`,
+                                type: 'POST',
+                                dataType: 'json',
+                                processData: true,
+                                contentType: 'application/json; charset=UTF-8',
+                                data: JSON.stringify({}),
+                            })
+                            .done(function(response, textStatus, jqXHR) {
+                                swal('Success!', response.msg, 'success');
+                                table.ajax.reload();
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                if(jqXHR.responseJSON.msg ?? false) {
+                                    swal('Error!', jqXHR.responseJSON.msg, 'error');
+                                }
+                            })
+                            .always(function() {
+                                $.LoadingOverlay("hide");
+                            });
+                            
+                        }, function (dismiss) {
+                        if (dismiss === 'cancel') {
+                          
+                        }
+                    });
+                });
+            }
+        });
+
+        $("#form").submit(function(e) {
+            e.preventDefault();
+            $('[validation-for]').text("");
+            var formData = new FormData(this);
+            $.LoadingOverlay("show");
+            $.ajax( Object.assign({
+                type: 'POST',
+                dataType: 'json',
+                processData: true,
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify(Object.fromEntries(formData)),
+            }, formAjaxConfig) )
+            .done(function(response, textStatus, jqXHR) {
+                swal('Success!', response.msg, 'success');
+                table.ajax.reload();
+                $('#modalform').modal('hide');
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                if(jqXHR.responseJSON.msg ?? false) {
+                    swal('Error!', jqXHR.responseJSON.msg, 'error');
+                    if(jqXHR.responseJSON.errors ?? false) {
+                        $.each(jqXHR.responseJSON.errors, function(index, val) {
+                            $(`[validation-for="${val.param}"]`).text(val.msg);
+                        });
+                    }
+                }
+            })
+            .always(function() {
+                $.LoadingOverlay("hide");
+            });
+            
+        });
+        
+    });
+</script>

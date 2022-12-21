@@ -1,0 +1,287 @@
+<style type="text/css">
+    #qrcode {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        height: 256px;
+    }
+</style>
+
+<div class="d-flex justify-content-between">
+    <div class="breadcrumb">
+        <h1>Device</h1>
+        <ul>
+            <li>Index</li>
+        </ul>
+    </div>
+    <div class="d-block">
+        <button id="btn-modal" class="btn btn-primary"> <i class="fa fa-plus"></i> New Device</button>
+    </div>
+</div>
+<div class="separator-breadcrumb border-top"></div>
+
+<table id="table" class="table table-bordered table-inverse table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Session</th>
+            <th>Started At</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+<div class="modal fade" id="modalform">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form id="form">
+                <div class="modal-header">
+                    <h4 class="modal-title">Form</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input name="name" value="" class="form-control" type="text"  autocomplete="off">
+                        <span validation-for="name" class="badge badge-pill badge-warning w-100 text-left py-1 px-2 mt-1"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="modal-qr">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Scan Me!</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="qrcode"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script type="text/javascript" src="/plugins/qrcode.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var formAjaxConfig = {};
+        var table;
+        var fcmCurrentToken;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((register) => {
+                    messaging.requestPermission().then(() => {
+                        messaging.getToken()
+                            .then((fcmToken) => {
+                                fcmCurrentToken = fcmToken;
+                                console.log(fcmToken)
+                                messaging.onMessage((payload) => {
+                                    console.log("onMessage event fired", payload);
+                                    if(payload.data.actions) {
+                                        switch(payload.data.actions) {
+                                            case "qr":
+                                                $("#qrcode").LoadingOverlay("hide");
+                                                qrcode.innerHTML = "";
+                                                new QRCode(qrcode, {
+                                                    text: payload.data.qr,
+                                                    width: 256,
+                                                    height: 256,
+                                                    colorDark : "#000000",
+                                                    colorLight : "#ffffff",
+                                                    correctLevel : QRCode.CorrectLevel.M
+                                                });
+                                            break;
+
+                                            case "qr_connected":
+                                                $("#modal-qr").modal("hide");
+                                                swal('Sukses!', 'Device connected!', 'success');
+                                                table.ajax.reload();
+                                            break;
+                                        }
+                                    }
+                                })
+                            });
+                    });
+                })
+        } else {
+            console.log('Service Worker not supported')
+        }
+
+        $("#btn-modal").click(function (e) {
+            e.preventDefault();
+            formAjaxConfig = {
+                url: '/api/devices/create',
+            };
+            document.forms['form'].reset();
+            $('#modalform').modal('show');
+        });
+
+        table = $('#table').DataTable({
+            'ajax':{
+                'url'        : '/api/devices/datatables',
+                'dataSrc'    : 'data',
+                'type'       : 'POST'
+             },
+            'processing'    : true,
+            'serverSide'    : true,
+            'paging'        : true,
+            'lengthChange'  : true,
+            'searching'     : true,
+            'ordering'      : false,
+            'info'          : true,
+            'autoWidth'     : false,
+            'columns'       : [
+                {"data": "name"},
+                {"data": "session"},
+                {"data": "startedAt"},
+                {"data": "status"},
+                {"data": "id", "render": function(data, i, row){
+                    const action = document.createElement("div")
+                    action.className = "table-action";
+                    action.innerHTML = (`
+                        <button class="btn btn-sm ${row.status=="running" ? "btn-outline-danger" : "btn-outline-success"}"><i class="fa ${row.status=="running" ? "fa-stop" : "fa-play"}"></i></button>
+                        <button class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                    `);
+                    return action.outerHTML;
+                }},
+            ],
+            'createdRow'    : function(parent, row) {
+                $("button", parent).eq(0).click(function(e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: `/api/devices/${row.session}/run`,
+                        type: 'POST',
+                        dataType: 'json',
+                        processData: true,
+                        contentType: 'application/json; charset=UTF-8',
+                        data: JSON.stringify({fcmtoken: fcmCurrentToken}),
+                    })
+                    .done(function(response, textStatus, jqXHR) {
+                        $("#modal-qr").modal("show");
+                        qrcode.innerHTML = "";
+                        $("#qrcode").LoadingOverlay("show");
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    })
+                    .always(function() {
+                        $.LoadingOverlay("hide");
+                    });
+                });
+
+                $("button", parent).eq(1).click(function (e) {
+                    e.preventDefault();
+                    document.forms['form'].reset();
+                    formAjaxConfig = {
+                        url: `/api/devices/${row.id}/update`,
+                    };
+                    $.each(row, function(index, val) {
+                        try {
+                            document.forms['form'][index].value = val;
+                        } catch(e) {
+                            //do nothing
+                        }
+                    });
+                    $('#modalform').modal('show');
+                });
+
+                $("button", parent).eq(2).click(function (e) {
+                    e.preventDefault();
+                    swal({
+                        title: 'Peringatan!',
+                        text: 'Anda akan menghapus perangkat yang dipilih?.',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        cancelButtonText: 'Tidak',
+                        confirmButtonText: 'Ya',
+                        }).then(function () {
+                            $.LoadingOverlay("show");
+                            $.ajax({
+                                url: `/api/devices/${row.id}/delete`,
+                                type: 'POST',
+                                dataType: 'json',
+                                processData: true,
+                                contentType: 'application/json; charset=UTF-8',
+                                data: JSON.stringify({}),
+                            })
+                            .done(function(response, textStatus, jqXHR) {
+                                swal('Success!', response.msg, 'success');
+                                table.ajax.reload();
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                if(jqXHR.responseJSON.msg ?? false) {
+                                    swal('Error!', jqXHR.responseJSON.msg, 'error');
+                                }
+                            })
+                            .always(function() {
+                                $.LoadingOverlay("hide");
+                            });
+                            
+                        }, function (dismiss) {
+                        if (dismiss === 'cancel') {
+                          
+                        }
+                    });
+                });
+            }
+        });
+
+        $("#form").submit(function(e) {
+            e.preventDefault();
+            $('[validation-for]').text("");
+            var formData = new FormData(this);
+            $.LoadingOverlay("show");
+            $.ajax( Object.assign({
+                type: 'POST',
+                dataType: 'json',
+                processData: true,
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify(Object.fromEntries(formData)),
+            }, formAjaxConfig) )
+            .done(function(response, textStatus, jqXHR) {
+                swal('Success!', response.msg, 'success');
+                table.ajax.reload();
+                $('#modalform').modal('hide');
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                if(jqXHR.responseJSON.msg ?? false) {
+                    swal('Error!', jqXHR.responseJSON.msg, 'error');
+                    if(jqXHR.responseJSON.errors ?? false) {
+                        $.each(jqXHR.responseJSON.errors, function(index, val) {
+                            $(`[validation-for="${val.param}"]`).text(val.msg);
+                        });
+                    }
+                }
+            })
+            .always(function() {
+                $.LoadingOverlay("hide");
+            });
+        });
+    });
+</script>

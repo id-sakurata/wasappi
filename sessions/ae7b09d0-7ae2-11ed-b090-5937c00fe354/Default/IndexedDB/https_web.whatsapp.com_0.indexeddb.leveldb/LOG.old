@@ -1,0 +1,14 @@
+2022/12/20-19:59:50.483 10e4 Reusing MANIFEST D:\NodeJS\htdocs\mvc-admin\sessions\ae7b09d0-7ae2-11ed-b090-5937c00fe354\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2022/12/20-19:59:50.484 10e4 Recovering log #143
+2022/12/20-19:59:50.489 10e4 Reusing old log D:\NodeJS\htdocs\mvc-admin\sessions\ae7b09d0-7ae2-11ed-b090-5937c00fe354\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000143.log 
+2022/12/20-19:59:50.489 10e4 Delete type=2 #141
+2022/12/20-19:59:51.920 fc0 Level-0 table #148: started
+2022/12/20-19:59:51.987 fc0 Level-0 table #148: 19786 bytes OK
+2022/12/20-19:59:52.063 fc0 Delete type=0 #143
+2022/12/20-19:59:52.065 fc0 Manual compaction at level-0 from '\x007\x00\x00\x00' @ 72057594037927935 : 1 .. '\x008\x00\x00\x00' @ 0 : 0; will stop at '\x007\x06 \x03\x00\x00\x00\x00\x00\x80V@\x00\x01\x0b\x00I\x00d\x00T\x00t\x00l\x009\x000\x00D\x00a\x00y\x00s' @ 83455 : 1
+2022/12/20-19:59:52.065 fc0 Compacting 1@0 + 1@1 files
+2022/12/20-19:59:52.196 fc0 Generated table #149@0: 9518 keys, 78526 bytes
+2022/12/20-19:59:52.196 fc0 Compacted 1@0 + 1@1 files => 78526 bytes
+2022/12/20-19:59:52.250 fc0 compacted to: files[ 0 1 1 0 0 0 0 ]
+2022/12/20-19:59:52.251 fc0 Delete type=2 #148
+2022/12/20-19:59:52.251 fc0 Manual compaction at level-0 from '\x007\x06 \x03\x00\x00\x00\x00\x00\x80V@\x00\x01\x0b\x00I\x00d\x00T\x00t\x00l\x009\x000\x00D\x00a\x00y\x00s' @ 83455 : 1 .. '\x008\x00\x00\x00' @ 0 : 0; will stop at (end)

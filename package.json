@@ -1,0 +1,32 @@
+{
+  "name": "mvc-admin",
+  "version": "1.0.0",
+  "description": "admin template",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2",
+    "express-validator": "^6.14.2",
+    "fs": "^0.0.1-security",
+    "hbs": "^4.2.0",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.20",
+    "path": "^0.12.7",
+    "sequelize": "^6.26.0",
+    "sqlite3": "^5.1.4",
+    "uuid": "^9.0.0",
+    "whatsapp-web.js": "^1.18.4"
+  },
+  "type": "module"
+}
