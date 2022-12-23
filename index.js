@@ -61,4 +61,4 @@ db.authenticate()
 // httpsServer.listen(443, () => console.log(`Server Running at https://localhost`))
 app.listen(process.env.PORT ?? 5000, () => console.log(`Server Running at http://localhost:${config.port}`));
 
-export {app}
+export default {app}
