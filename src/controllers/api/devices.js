@@ -115,6 +115,18 @@ const datatables = async (req, res) => {
 	var recordsTotal = await devicesModel.count();
 	var recordsFilter = await devicesModel.count(params);
 	var data = await devicesModel.findAll(params);
+
+	await data.forEach(async (v, k)=>{
+		try {
+			const client = req.wa_clients.get(v.session);
+			console.log(client);
+			var state = await client.getState();
+			data[k]['status'] = "Running";
+		} catch(e) {
+			data[k]['status'] = "Not Running";
+		}
+	});
+
 	res.json({
 		"draw": draw,
 		"recordsTotal": recordsTotal,
@@ -179,6 +191,7 @@ const run = async (req, res) => {
 
 			client.on('message', msg => {
 			    console.log(`[${session_id}] Has new msg`);
+			    console.log(msg);
 			});
 
 			client.on('authenticated', ()=>{
@@ -212,9 +225,16 @@ const run = async (req, res) => {
 						})
 					}
 				} else {
-					res.status(400).json({
-						"msg": "Fail get state.",
-					})
+					try {
+						client.destroy();
+					} catch(err) {
+
+					}
+
+					client.initialize();
+					res.json({
+						"msg": "Device restarted.",
+					});
 				}
 			} catch(err) {
 				client.initialize();
@@ -286,9 +306,25 @@ const stop = async(req, res) => {
 	}
 }
 
+const send = async(req, res) => {
+	try {
+		const client = req.wa_clients.get(req.params.id);
+		const {chatId, message} = req.body;
+		client.sendMessage(`${chatId}@c.us`, message);
+		res.json({
+			"msg": "Message Send.",
+		});
+	} catch(e) {
+		res.status(500).json({
+			"msg": "Fail send message.",
+		});
+	}
+}
+
 export default {
 	create, update,
 	del, datatables,
 	run, restart, 
-	status, stop
+	status, stop,
+	send
 }

@@ -25,5 +25,6 @@ router.post("/devices/:id/run", auth.webAuthenticate, devicesController.run);
 router.post("/devices/:id/restart", auth.webAuthenticate, devicesController.restart);
 router.post("/devices/:id/stop", auth.webAuthenticate, devicesController.stop);
 router.post("/devices/:id/status", auth.webAuthenticate, devicesController.status);
+router.post("/devices/:id/send", auth.webAuthenticate, devicesController.send);
 
 export default router;

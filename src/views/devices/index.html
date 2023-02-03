@@ -186,7 +186,9 @@
                         $("#qrcode").LoadingOverlay("show");
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
-                        console.log(jqXHR);
+                        if(jqXHR.responseJSON ?? false) {
+                            console.log(jqXHR.responseJSON.msg);
+                        }
                     })
                     .always(function() {
                         $.LoadingOverlay("hide");

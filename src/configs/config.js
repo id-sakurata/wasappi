@@ -1,5 +1,5 @@
 const config = {
-	"port": 80,
+	"port": 5000,
 	"bcryptRoundSalt": 2,
 	"jwtPrivateKey": "mvc19admin13"
 }
