@@ -25,7 +25,7 @@ app.use(cookieParser());
 
 // ignore route public dir
 app.use(express.static('public'));
-app.use(express.static('favicon.ico'));
+app.use(express.static('/favicon.ico'));
 
 app.use(async (req, res, next)=>{
   req.wa_webjs = wa_webjs;
