@@ -4,9 +4,10 @@
   "description": "admin template",
   "main": "index.js",
   "scripts": {
+    "prep": "npm axios bcrypt body-parser cookie-parser express express-validator fs hbs https jsonwebtoken moment nodemon path uuid whatsapp-web.js sequelize && npm install mysql2 sqlite3 -g",
     "dev": "nodemon index.js",
     "serve": "node index.js",
-    "start": "pm2 start index.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
