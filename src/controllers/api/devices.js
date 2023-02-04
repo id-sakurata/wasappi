@@ -116,14 +116,15 @@ const datatables = async (req, res) => {
 	var recordsFilter = await devicesModel.count(params);
 	var data = await devicesModel.findAll(params);
 
-	await data.forEach(async (v, k)=>{
+	data.forEach((v, k)=>{
 		try {
 			const client = req.wa_clients.get(v.session);
-			console.log(client);
-			var state = await client.getState();
-			data[k]['status'] = "Running";
+			client.getState().then(result=>{
+				console.log(result);
+				data[k]['status'] = result;
+			})
 		} catch(e) {
-			data[k]['status'] = "Not Running";
+			data[k]['status'] = "Not Initialized";
 		}
 	});
 
@@ -147,9 +148,18 @@ const run = async (req, res) => {
 		        	userDataDir: `./sessions/${req.params.id}`,
 		        	defaultViewport: null, 
 		        	args: [
-		            	'--no-sandbox','--disable-setuid-sandbox'
+		            	'--no-sandbox',
+		            	'--disable-setuid-sandbox',
+		            	'--disable-dev-shm-usage',
+		            	'--disable-accelerated-2d-canvas',
+						'--no-first-run',
+						'--no-zygote',
+						'--disable-gpu'
 		        	] 
-		    	}
+		    	}, 
+		    	restartOnAuthFail: true,
+		    	takeoverOnConflict: true,
+		    	takeoverTimeoutMs: 10
 			});
 
 			axios.defaults.headers.post['Content-Type'] = `application/json`;
@@ -187,11 +197,34 @@ const run = async (req, res) => {
 
 			client.on('ready', () => {
 			    console.log(`[${session_id}] Client is ready!`);
+			    if(req.userdata.fcmtoken ?? false) {
+				    axios.post('https://fcm.googleapis.com/fcm/send', {
+					    "to": req.userdata.fcmtoken,
+					    "notification": {
+					        "title":"Device Ready.",
+					        "body":"Device Connected."
+					    },
+					    "data":{
+					        "title":"Device Ready.",
+					        "body":"Device Connected.",
+					        "actions": "qr_connected",
+					    },
+					    "priority":"high",
+					    "webpush": {
+					      "fcm_options": {
+					        "link": "https://vue-app.com/devices"
+					      }
+					    }
+					}).then(function(response){
+				    	// console.log(response);
+				    }).catch(function(error){
+				    	// console.log(error);
+				    });
+			    }
 			});
 
 			client.on('message', msg => {
 			    console.log(`[${session_id}] Has new msg`);
-			    console.log(msg);
 			});
 
 			client.on('authenticated', ()=>{
@@ -200,6 +233,10 @@ const run = async (req, res) => {
 
 			client.on('auth_failure', (msg)=>{
 			    console.log(`[${session_id}] auth failure: `, msg);
+			});
+
+			client.on('change_state', (state)=>{
+			    console.log(`[${session_id}] state: `, state);
 			});
 
 			client.on('disconnected', (reason)=>{
