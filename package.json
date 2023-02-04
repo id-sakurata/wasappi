@@ -29,9 +29,9 @@
     "sqlite3": "5.1.4",
     "nodemon": "^2.0.20",
     "path": "^0.12.7",
-    "sequelize": "^6.26.0",
     "uuid": "^9.0.0",
-    "whatsapp-web.js": "^1.19.3"
+    "whatsapp-web.js": "^1.19.3",
+    "sequelize": "^6.26.0"
   },
   "type": "module"
 }
