@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+const { body, validationResult } = require("express-validator");
 
 const validationRun = async function (req, res, validation) {
 	await validation(body);
@@ -10,6 +10,6 @@ const validationRun = async function (req, res, validation) {
 	}
 };
 
-export default {
+module.exports = {
 	validationRun
 }

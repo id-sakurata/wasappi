@@ -66,7 +66,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Scan Me!</h4>
+                <h4 class="modal-title">Loading!</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
@@ -163,6 +163,7 @@
                     action.className = "table-action";
                     action.innerHTML = (`
                         <button class="btn btn-sm ${row.status=="running" ? "btn-outline-danger" : "btn-outline-success"}"><i class="fa ${row.status=="running" ? "fa-stop" : "fa-play"}"></i></button>
+                        <button class="btn btn-sm btn-primary"><i class="fa fa-sync"></i></button>
                         <button class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></button>
                         <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
                     `);
@@ -173,7 +174,36 @@
                 $("button", parent).eq(0).click(function(e) {
                     e.preventDefault();
                     $.ajax({
-                        url: `/api/devices/${row.session}/run`,
+                        url: `/api/devices/${row.session}/${row.status=="running" ? "stop" : "run"}`,
+                        type: 'POST',
+                        dataType: 'json',
+                        processData: true,
+                        contentType: 'application/json; charset=UTF-8',
+                        data: JSON.stringify({fcmtoken: fcmCurrentToken}),
+                    })
+                    .done(function(response, textStatus, jqXHR) {
+                        if(row.status=="running") {
+                            table.ajax.reload();
+                        } else {
+                            $("#modal-qr").modal("show");
+                            qrcode.innerHTML = "";
+                            $("#qrcode").LoadingOverlay("show");
+                        }
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        if(jqXHR.responseJSON ?? false) {
+                            console.log(jqXHR.responseJSON.msg);
+                        }
+                    })
+                    .always(function() {
+                        $.LoadingOverlay("hide");
+                    });
+                });
+
+                $("button", parent).eq(1).click(function(e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: `/api/devices/${row.session}/restart`,
                         type: 'POST',
                         dataType: 'json',
                         processData: true,
@@ -195,7 +225,7 @@
                     });
                 });
 
-                $("button", parent).eq(1).click(function (e) {
+                $("button", parent).eq(2).click(function (e) {
                     e.preventDefault();
                     document.forms['form'].reset();
                     formAjaxConfig = {
@@ -211,7 +241,7 @@
                     $('#modalform').modal('show');
                 });
 
-                $("button", parent).eq(2).click(function (e) {
+                $("button", parent).eq(3).click(function (e) {
                     e.preventDefault();
                     swal({
                         title: 'Peringatan!',

@@ -4,4 +4,4 @@ const config = {
 	"jwtPrivateKey": "mvc19admin13"
 }
 
-export default config
+module.exports = config

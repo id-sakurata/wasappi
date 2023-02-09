@@ -4,7 +4,7 @@
   "description": "admin template",
   "main": "index.js",
   "scripts": {
-    "prep": "npm axios bcrypt body-parser cookie-parser express express-validator fs hbs https jsonwebtoken moment nodemon path uuid whatsapp-web.js sequelize && npm install mysql2 sqlite3 -g",
+    "prep": "npm install axios bcrypt body-parser cookie-parser express express-validator fs hbs https jsonwebtoken moment nodemon path uuid whatsapp-web.js sequelize && npm install mysql2 sqlite3 -g",
     "dev": "nodemon index.js",
     "serve": "node index.js",
     "start": "node index.js"
@@ -34,5 +34,5 @@
     "whatsapp-web.js": "^1.19.3",
     "sequelize": "^6.26.0"
   },
-  "type": "module"
+  "type": "JavaScript"
 }

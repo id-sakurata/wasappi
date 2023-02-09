@@ -1,8 +1,8 @@
-import userModel from '../models/user.js'
-import config from '../configs/config.js'
-import jwt from "jsonwebtoken";
-import lang from "../configs/lang.js";
-import axios from "axios";
+const userModel = require('../models/user.js');
+const config = require('../configs/config.js');
+const jwt = require("jsonwebtoken");
+const lang = require("../configs/lang.js");
+const axios = require("axios");
 
 const webAuthenticate = async (req, res, next) => {
 	if(req.cookies.session ?? false) {
@@ -46,7 +46,7 @@ const getUserdata = async (req, res) => {
 	}
 }
 
-export default {
+module.exports = {
 	webAuthenticate,
 	getUserdata
 }

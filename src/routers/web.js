@@ -1,12 +1,12 @@
-import express from "express";
-import auth from '../middlewares/authentication.js'; 
+const express = require("express");
+const auth = require('../middlewares/authentication.js'); 
 const router = express.Router();
 
 //load controllers
-import homeController from "../controllers/home.js";
-import authController from "../controllers/auth.js";
-import usersController from "../controllers/users.js";
-import devicesController from "../controllers/devices.js";
+const homeController = require("../controllers/home.js");
+const authController = require("../controllers/auth.js");
+const usersController = require("../controllers/users.js");
+const devicesController = require("../controllers/devices.js");
 
 //auth
 router.get("/login", authController.login)
@@ -18,4 +18,4 @@ router.get("/", auth.webAuthenticate, homeController.index);
 router.get("/users", auth.webAuthenticate, usersController.index);
 router.get("/devices", auth.webAuthenticate, devicesController.index);
 
-export default router;
+module.exports = router;

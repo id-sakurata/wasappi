@@ -1,8 +1,8 @@
-import userModel from '../models/user.js' ;
-import config from '../configs/config.js';
-import bcrypt from 'bcrypt';
-import jwt from "jsonwebtoken";
-import lang from "../configs/lang.js";
+const userModel = require('../models/user.js');
+const config = require('../configs/config.js');
+const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const lang = require("../configs/lang.js");
 
 const login = (req, res) => {
 	res.render('login', {
@@ -51,7 +51,7 @@ const logoutAttempt = async (req, res) => {
 	res.redirect('/login');
 }
 
-export default {
+module.exports = {
 	login,
 	loginAttempt,
 	logoutAttempt

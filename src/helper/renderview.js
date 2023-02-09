@@ -1,4 +1,4 @@
-import hbs from "hbs";
+const hbs = require("hbs");
 
 const admin = async (req, res, path, data={}) => {
 	let defaultdata = {
@@ -10,6 +10,6 @@ const admin = async (req, res, path, data={}) => {
 	res.render(path, viewdata);
 }
 
-export default {
+module.exports = {
 	admin
 }

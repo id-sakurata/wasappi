@@ -1,12 +1,12 @@
-import devicesModel from '../../models/devices.js'
-import { Op } from "sequelize";
-import formValidation from '../../helper/formValidation.js';
-import lang from "../../configs/lang.js";
-import bcrypt from 'bcrypt';
-import config from '../../configs/config.js';
-import {v1 as uniqId} from "uuid";
-import jwt from "jsonwebtoken";
-import axios from "axios";
+const devicesModel = require('../../models/devices.js');
+const { Op } = require("sequelize");
+const formValidation = require('../../helper/formValidation.js');
+const lang = require("../../configs/lang.js");
+const bcrypt = require('bcrypt');
+const config = require('../../configs/config.js');
+const {v1} = require("uuid");
+const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
 const create = async (req, res) => {
 	var validationResult = await formValidation.validationRun(req, res, async function(body) {
@@ -18,7 +18,7 @@ const create = async (req, res) => {
 		const jwtDecoded = jwt.verify(req.cookies.session, config.jwtPrivateKey);
 		const form = {
 			name: req.body.name,
-			session: uniqId(),
+			session: v1(),
 			user_id: jwtDecoded.id
 		};
 
@@ -116,24 +116,54 @@ const datatables = async (req, res) => {
 	var recordsFilter = await devicesModel.count(params);
 	var data = await devicesModel.findAll(params);
 
-	data.forEach((v, k)=>{
+	const vdata = data.map(function(val) {
 		try {
-			const client = req.wa_clients.get(v.session);
-			client.getState().then(result=>{
-				console.log(result);
-				data[k]['status'] = result;
-			})
+			const client = req.wa_clients.get(val.session);
+			if(client) {
+				client.getState().then(function(result){
+					val['status'] = result;
+				});
+			} else {
+				val['status'] = "Not Initialized";
+			}
 		} catch(e) {
-			data[k]['status'] = "Not Initialized";
+			val['status'] = "Not Initialized";
 		}
+		return val;
 	});
 
-	res.json({
+	await res.json({
 		"draw": draw,
 		"recordsTotal": recordsTotal,
 		"recordsFiltered": recordsFilter,
 		"data": data,
 	})
+}
+
+const device_err = async (e) => {
+	if(req.userdata.fcmtoken ?? false) {
+	    axios.post('https://fcm.googleapis.com/fcm/send', {
+		    "to": req.userdata.fcmtoken,
+		    "notification": {
+		        "title":"Device Crashed.",
+		        "body":"Device was crashed, please restart device."
+		    },
+		    "data":{
+		        "title":"Device Crashed.",
+		        "body":"Device was crashed, please restart device.",
+		    },
+		    "priority":"high",
+		    "webpush": {
+		      "fcm_options": {
+		        "link": "http://gw.sakuratadevapp.my.id/devices"
+		      }
+		    }
+		}).then(function(response){
+	    	// console.log(response);
+	    }).catch(function(error){
+	    	// console.log(error);
+	    });
+    }
 }
 
 const run = async (req, res) => {
@@ -144,7 +174,7 @@ const run = async (req, res) => {
 			const client = new req.wa_webjs.Client({
 				restartOnAuthFail: true,
 		        puppeteer: { 
-		        	headless: false, 
+		        	headless: true, 
 		        	userDataDir: `./sessions/${req.params.id}`,
 		        	defaultViewport: null, 
 		        	args: [
@@ -168,6 +198,21 @@ const run = async (req, res) => {
 			req.wa_clients.set(req.params.id, client);
 
 			client.on('qr', (qr) => {
+
+				const form = {
+					status: "stopped",
+				};
+
+				devicesModel.update(form,{
+					where: {
+						session: req.params.id
+					}
+				}).then(function(msg){
+					console.log(`[${session_id}] Status Updated`);
+				}).catch(function(err){
+					console.log(`[${session_id}] `, err);
+				});
+
 			    if(req.userdata.fcmtoken ?? false) {
 				    axios.post('https://fcm.googleapis.com/fcm/send', {
 					    "to": req.userdata.fcmtoken,
@@ -184,7 +229,7 @@ const run = async (req, res) => {
 					    "priority":"high",
 					    "webpush": {
 					      "fcm_options": {
-					        "link": "https://vue-app.com/devices"
+					        "link": "http://gw.sakuratadevapp.my.id/devices"
 					      }
 					    }
 					}).then(function(response){
@@ -196,6 +241,7 @@ const run = async (req, res) => {
 			});
 
 			client.on('ready', () => {
+
 			    console.log(`[${session_id}] Client is ready!`);
 			    if(req.userdata.fcmtoken ?? false) {
 				    axios.post('https://fcm.googleapis.com/fcm/send', {
@@ -212,7 +258,7 @@ const run = async (req, res) => {
 					    "priority":"high",
 					    "webpush": {
 					      "fcm_options": {
-					        "link": "https://vue-app.com/devices"
+					        "link": "http://gw.sakuratadevapp.my.id/devices"
 					      }
 					    }
 					}).then(function(response){
@@ -228,6 +274,21 @@ const run = async (req, res) => {
 			});
 
 			client.on('authenticated', ()=>{
+
+				const form = {
+					status: "running",
+				};
+
+				devicesModel.update(form,{
+					where: {
+						session: req.params.id
+					}
+				}).then(function(msg){
+					console.log(`[${session_id}] Status Updated`);
+				}).catch(function(err){
+					console.log(`[${session_id}] `, err);
+				});
+
 			    console.log(`[${session_id}] Was authenticated`);
 			});
 
@@ -235,15 +296,26 @@ const run = async (req, res) => {
 			    console.log(`[${session_id}] auth failure: `, msg);
 			});
 
-			client.on('change_state', (state)=>{
-			    console.log(`[${session_id}] state: `, state);
-			});
-
 			client.on('disconnected', (reason)=>{
+
+				const form = {
+					status: "stopped",
+				};
+
+				devicesModel.update(form,{
+					where: {
+						session: req.params.id
+					}
+				}).then(function(msg){
+					console.log(`[${session_id}] Status Updated`);
+				}).catch(function(err){
+					console.log(`[${session_id}] `, err);
+				});
+
 			    console.log(`[${session_id}] disconnected reason: `, reason);
 			});
 
-			client.initialize();
+			client.initialize().catch(_ => _);
 			
 			res.json({
 				"msg": "Device initialized."
@@ -254,7 +326,7 @@ const run = async (req, res) => {
 				var state = await client.getState();
 				if(typeof state == "string") {
 					if(state != "CONNECTED") {
-						client.initialize();
+						client.initialize().catch(_ => _);
 					} else {
 						res.status(400).json({
 							"msg": "This device already run.",
@@ -268,13 +340,13 @@ const run = async (req, res) => {
 
 					}
 
-					client.initialize();
+					client.initialize().catch(_ => _);
 					res.json({
 						"msg": "Device restarted.",
 					});
 				}
 			} catch(err) {
-				client.initialize();
+				client.initialize().catch(_ => _);
 				res.json({
 					"msg": "Device started."
 				})
@@ -298,7 +370,7 @@ const restart = async(req, res) => {
 
 			}
 
-			client.initialize();
+			client.initialize().catch(_ => _);
 			res.json({
 				"msg": "Device restarted.",
 			});
@@ -333,6 +405,21 @@ const stop = async(req, res) => {
 	try {
 		const client = req.wa_clients.get(req.params.id);
 		client.destroy();
+
+		const form = {
+			status: "stopped",
+		};
+
+		devicesModel.update(form,{
+			where: {
+				session: req.params.id
+			}
+		}).then(function(msg){
+			console.log(`[${req.params.id}] Status Updated`);
+		}).catch(function(err){
+			console.log(`[${req.params.id}] `, err);
+		});
+
 		res.json({
 			"msg": "Device stoped.",
 		});
@@ -358,7 +445,7 @@ const send = async(req, res) => {
 	}
 }
 
-export default {
+module.exports = {
 	create, update,
 	del, datatables,
 	run, restart, 

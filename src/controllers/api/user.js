@@ -1,9 +1,9 @@
-import userModel from '../../models/user.js'
-import { Op } from "sequelize";
-import formValidation from '../../helper/formValidation.js';
-import lang from "../../configs/lang.js";
-import bcrypt from 'bcrypt';
-import config from '../../configs/config.js';
+const userModel = require('../../models/user.js');
+const { Op } = require("sequelize");
+const formValidation = require('../../helper/formValidation.js');
+const lang = require("../../configs/lang.js");
+const bcrypt = require('bcrypt');
+const config = require('../../configs/config.js');
 
 const update = async (req, res) => {
 	var validationResult = await formValidation.validationRun(req, res, async function(body) {
@@ -120,6 +120,6 @@ const datatables = async (req, res) => {
 	})
 }
 
-export default {
+module.exports = {
 	update, del, datatables
 }

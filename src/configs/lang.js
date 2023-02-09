@@ -1,4 +1,4 @@
-export default {
+const lang = {
 	"unauthorized": "Pastikan anda sudah masuk.",
 	"loginSuccess": "Berhasil masuk.",
 	"loginFail": "Kata sandi salah.",
@@ -16,3 +16,5 @@ export default {
 	"validationUsernameTaken": "Username sudah digunakan.",
 	"validationEmailTaken": "Email sudah digunakan.",
 }
+
+module.exports = lang;

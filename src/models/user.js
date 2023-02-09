@@ -1,7 +1,7 @@
-import db from '../configs/database.js';
-import { DataTypes } from "sequelize";
+const db = require('../configs/database.js');
+const { DataTypes } = require("sequelize");
 
-export default db.define("users", {
+const users = db.define("users", {
 	id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -32,4 +32,6 @@ export default db.define("users", {
     }
 }, {
 	paranoid: true
-})
+});
+
+module.exports = users;

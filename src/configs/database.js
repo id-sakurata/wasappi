@@ -1,14 +1,14 @@
-import { Sequelize } from "sequelize";
-import path from "path";
+const { Sequelize } = require("sequelize");
+const path = require("path");
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const db = new Sequelize(
-  "sql12595615",
-  "sql12595615",
-  "mYr2rwWAvW",
+  "sakurata_wa", //database name
+  "sakurata", // username
+  "gjm456PTW789", // password
   {
-    host: 'sql12.freemysqlhosting.net',
+    host: 'sakuratadevapp.my.id',
     port: '3306',
     dialect: 'mysql',
     timezone: "+07:00",
@@ -16,9 +16,4 @@ const db = new Sequelize(
   }
 );
 
-// const db = new Sequelize({
-//   dialect: 'sqlite',
-//   storage: './src/configs/database.db'
-// });
-
-export default db;
+module.exports = db;

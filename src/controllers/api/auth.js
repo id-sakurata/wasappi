@@ -1,9 +1,9 @@
-import userModel from '../../models/user.js';
-import config from '../../configs/config.js';
-import bcrypt from 'bcrypt';
-import jwt from "jsonwebtoken";
-import formValidation from '../../helper/formValidation.js';
-import lang from "../../configs/lang.js";
+const userModel = require('../../models/user.js');
+const config = require('../../configs/config.js');
+const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const formValidation = require('../../helper/formValidation.js');
+const lang = require("../../configs/lang.js");
 
 const register = async (req, res) => {
 	var validationResult = await formValidation.validationRun(req, res, async function(body) {
@@ -95,7 +95,7 @@ const setfirebasetoken = async (req, res) => {
 	});
 }
 
-export default {
+module.exports = {
 	register,
 	login,
 	setfirebasetoken

@@ -1,11 +1,11 @@
-import express from "express";
-import auth from '../middlewares/authentication.js'; 
+const express = require("express");
+const auth = require('../middlewares/authentication.js'); 
 const router = express.Router();
 
 //load controllers
-import authController from "../controllers/api/auth.js";
-import userController from "../controllers/api/user.js";
-import devicesController from "../controllers/api/devices.js";
+const authController = require("../controllers/api/auth.js");
+const userController = require("../controllers/api/user.js");
+const devicesController = require("../controllers/api/devices.js");
 
 //auth
 router.post("/auth/register", authController.register);
@@ -27,4 +27,4 @@ router.post("/devices/:id/stop", auth.webAuthenticate, devicesController.stop);
 router.post("/devices/:id/status", auth.webAuthenticate, devicesController.status);
 router.post("/devices/:id/send", auth.webAuthenticate, devicesController.send);
 
-export default router;
+module.exports = router;
