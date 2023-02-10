@@ -82,10 +82,47 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div class="modal fade" id="modal-message">
+    <div class="modal-dialog" role="document">
+        <form id="form-message">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Message Test</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Phone Address</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
+                            </div>
+                            <input name="chatId" value="" placeholder="6285735123xxx" required class="form-control" type="text" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" name="message" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 <script type="text/javascript" src="/plugins/qrcode.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
+
+        var selectedDeviceId;
         var formAjaxConfig = {};
         var table;
         var fcmCurrentToken;
@@ -164,6 +201,7 @@
                     action.innerHTML = (`
                         <button class="btn btn-sm ${row.status=="running" ? "btn-outline-danger" : "btn-outline-success"}"><i class="fa ${row.status=="running" ? "fa-stop" : "fa-play"}"></i></button>
                         <button class="btn btn-sm btn-primary"><i class="fa fa-sync"></i></button>
+                        <button class="btn btn-sm btn-outline-warning"><i class="fa fa-comments"></i></button>
                         <button class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></button>
                         <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
                     `);
@@ -227,6 +265,12 @@
 
                 $("button", parent).eq(2).click(function (e) {
                     e.preventDefault();
+                    $("#modal-message").modal('show');
+                    selectedDeviceId = row.session;
+                });
+
+                $("button", parent).eq(3).click(function (e) {
+                    e.preventDefault();
                     document.forms['form'].reset();
                     formAjaxConfig = {
                         url: `/api/devices/${row.id}/update`,
@@ -241,7 +285,7 @@
                     $('#modalform').modal('show');
                 });
 
-                $("button", parent).eq(3).click(function (e) {
+                $("button", parent).eq(4).click(function (e) {
                     e.preventDefault();
                     swal({
                         title: 'Peringatan!',
@@ -309,6 +353,32 @@
                             $(`[validation-for="${val.param}"]`).text(val.msg);
                         });
                     }
+                }
+            })
+            .always(function() {
+                $.LoadingOverlay("hide");
+            });
+        });
+
+        $("#form-message").submit(function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            $.LoadingOverlay("show");
+            $.ajax({
+                url: `/api/devices/${selectedDeviceId}/send`,
+                type: 'POST',
+                dataType: 'json',
+                processData: true,
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify(Object.fromEntries(formData)),
+            })
+            .done(function(response, textStatus, jqXHR) {
+                swal('Success!', response.msg, 'success');
+                $('#modal-message').modal('hide');
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                if(jqXHR.responseJSON.msg ?? false) {
+                    swal('Error!', jqXHR.responseJSON.msg, 'error');
                 }
             })
             .always(function() {
